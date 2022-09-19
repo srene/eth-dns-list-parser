@@ -85,7 +85,43 @@ public class DnsListParser {
       for (String keyStr : json.keySet()) {
         JSONObject json2 = json.getJSONObject(keyStr);
 
-        //System.out.println("Record key: " + keyStr);
+        // System.out.println("Record key: " + keyStr);
+        EthereumNodeRecord enr =
+            EthereumNodeRecord.fromRLP(
+                (Base64URLSafe.decode(json2.getString("record").substring(4))));
+
+        String addr = enr.ip().toString().substring(1);
+        String subAddr = parseIp(addr);
+        if (ipMap.get(subAddr) == null) {
+          List<String> l = new ArrayList<>();
+          l.add(addr);
+          ipMap.put(subAddr, l);
+
+        } else {
+          ipMap.get(subAddr).add(addr);
+        }
+      }
+
+    } catch (Exception e) {
+      System.err.println("Exception " + e);
+      return null;
+    }
+
+    return ipMap;
+  }
+
+  public static HashMap<String, List<String>> getRandomFromMap(String url) {
+    HashMap<String, List<String>> ipMap = new HashMap<String, List<String>>();
+
+    try {
+      JSONObject json = readJsonFromUrl(url);
+
+      Security.addProvider(new BouncyCastleProvider());
+      int i = 0;
+      for (String keyStr : json.keySet()) {
+        JSONObject json2 = json.getJSONObject(keyStr);
+
+        // System.out.println("Record key: " + keyStr);
         EthereumNodeRecord enr =
             EthereumNodeRecord.fromRLP(
                 (Base64URLSafe.decode(json2.getString("record").substring(4))));
@@ -118,8 +154,7 @@ public class DnsListParser {
             "https://raw.githubusercontent.com/ethereum/discv4-dns-lists/master/all.json");
 
     for (String net : ipMap.keySet()) {
-
-      System.out.print("Network " + net + " ");
+      System.out.print(net + " " + ipMap.get(net).size() + " ");
       for (String addr : ipMap.get(net)) {
         System.out.print(addr + " ");
       }
