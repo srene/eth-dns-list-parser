@@ -132,9 +132,9 @@ public class DnsListParser {
           List<String> l = new ArrayList<>();
           l.add(addr);
           ipMap.put(subAddr, l);
-
         } else {
-          ipMap.get(subAddr).add(addr);
+
+          if (!ipMap.get(subAddr).contains(addr)) ipMap.get(subAddr).add(addr);
         }
       }
 
